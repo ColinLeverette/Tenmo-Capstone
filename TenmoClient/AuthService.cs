@@ -68,6 +68,10 @@ namespace TenmoClient
                 client.Authenticator = new JwtAuthenticator(response.Data.Token);
                 return response.Data;
             }
+
+
+
+
         }
     }
 }

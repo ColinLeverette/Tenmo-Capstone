@@ -5,7 +5,7 @@ using TenmoServer.Security;
 
 namespace TenmoServer.Controllers
 {
-    [Route("[controller]")]
+    [Route("login")]
     [ApiController]
     public class LoginController : ControllerBase
     {
@@ -68,5 +68,13 @@ namespace TenmoServer.Controllers
 
             return result;
         }
+
+
+
+
+
+
+
+
     }
 }

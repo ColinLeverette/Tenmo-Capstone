@@ -1,16 +1,23 @@
 ﻿using MenuFramework;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using TenmoClient.Data;
+using TenmoClient.Models;
 
 namespace TenmoClient.Views
 {
     public class MainMenu : ConsoleMenu
     {
+        private readonly static string API_BASE_URL = "https://localhost:44315/";
+        private readonly IRestClient client = new RestClient();
+
+
 
         public MainMenu()
-        { 
+        {
+        
             AddOption("View your current balance", ViewBalance)
                 .AddOption("View your past transfers", ViewTransfers)
                 .AddOption("View your pending requests", ViewRequests)
@@ -27,7 +34,12 @@ namespace TenmoClient.Views
 
         private MenuOptionResult ViewBalance()
         {
-            Console.WriteLine("Not yet implemented!");
+            RestRequest request = new RestRequest($@"accounts/userId");
+            IRestResponse<Account> response = client.Get<Account>(request);
+
+            Account account = response.Data;
+
+            Console.WriteLine($"{account.Balance}");
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 

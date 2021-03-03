@@ -1,0 +1,33 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TenmoServer.DAO;
+using TenmoServer.Models;
+
+namespace TenmoServer.Controllers
+{
+    [Route("accounts")]
+    [ApiController]
+    //[Authorize]
+    public class AccountsController : ControllerBase
+    {
+        private IAccountDAO accountDAO;
+
+        public AccountsController(IAccountDAO accountDAO)
+        {
+            this.accountDAO = accountDAO;
+        }
+
+
+        [HttpGet("{userId}")]
+        public Account GetAccount(int userId)
+        {
+            return accountDAO.GetAccount(userId);
+        }
+
+    }
+}
