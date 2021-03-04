@@ -57,6 +57,26 @@ namespace TenmoServer.DAO
             return listOfAccounts;
         }
 
+        //public Account TransferBucks()
+        //{
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    {
+        //        conn.Open();
+
+        //        SqlCommand cmd = new SqlCommand("begin transaction update accounts set balance = @senderBalance where account_id = @senderId;  " +
+        //            "update accounts set balance = @recipientBalance where account_id = @recipientId");
+        //        SqlDataReader rdr = cmd.ExecuteReader();
+        //        cmd.Parameters.AddWithValue("@senderBalance", "")
+
+        //        if (rdr.Read())
+        //        {
+        //            listOfAccounts.Add(RowToObject(rdr));
+        //        }
+        //    }
+        //    return listOfAccounts;
+        //}
+
+
 
 
         private Account RowToObject(SqlDataReader rdr)

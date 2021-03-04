@@ -1,6 +1,7 @@
 ﻿using AuctionApp.Exceptions;
 using MenuFramework;
 using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -12,9 +13,11 @@ namespace TenmoClient.Views
 {
     public class MainMenu : ConsoleMenu
     {
-    
+
         private readonly static string API_ACCOUNT_URL = "https://localhost:44315/accounts/";
+        private readonly static string API_USERS_URL = "https://localhost:44315/users/";
         private readonly IRestClient client = new RestClient();
+
 
         public MainMenu()
         {
@@ -35,10 +38,14 @@ namespace TenmoClient.Views
         //Ask about authorization
         private MenuOptionResult ViewBalance()
         {
+            string token = UserService.GetToken();
+            client.Authenticator = new JwtAuthenticator(token);
             int userId = UserService.GetUserId();
             RestRequest request = new RestRequest(API_ACCOUNT_URL + userId);
             IRestResponse<Account> response = client.Get<Account>(request);
             Account account = null;
+            
+
 
             if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
             {
@@ -68,9 +75,12 @@ namespace TenmoClient.Views
         // 4.1: Show a list of users to send TE Bucks to
         private MenuOptionResult SendTEBucks()
         {
-            RestRequest request = new RestRequest(API_ACCOUNT_URL);
-            IRestResponse<List<Account>> response = client.Get<List<Account>>(request);
-            List<Account> account = new List<Account>();
+            string token = UserService.GetToken();
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_USERS_URL);
+            IRestResponse<List<User>> response = client.Get<List<User>>(request);
+            List<User> user = new List<User>();
+            int userId = UserService.GetUserId();
 
             if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
             {
@@ -78,22 +88,32 @@ namespace TenmoClient.Views
             }
             else
             {
-                account = response.Data;
+                user = response.Data;
             }
 
             Console.WriteLine("------------------------------------");
             Console.WriteLine("Users ID           Name");
             Console.WriteLine("------------------------------------");
 
-            foreach (Account acct in account)
+            foreach (User u in user)
             {
-                Console.WriteLine($"{acct.AccountId}");
+                if (u.UserId != userId)
+                {
+                    Console.WriteLine($"{u.UserId}                   {u.Username}");
+                }
             }
+
+            Console.Write("Please enter the Id of User you'd like to send TE bucks to: ");
+            int recipientId = int.Parse(Console.ReadLine());
+            Console.Write("Please enter the amount: ");
+            decimal sendAmount = decimal.Parse(Console.ReadLine());
+
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
         private MenuOptionResult RequestTEBucks()
         {
+
             Console.WriteLine("Not yet implemented!");
             return MenuOptionResult.WaitAfterMenuSelection;
         }
