@@ -75,6 +75,8 @@ namespace TenmoClient.Views
         // 4.1: Show a list of users to send TE Bucks to
         private MenuOptionResult SendTEBucks()
         {
+
+            // Part 1 - List out all userIds and userNames
             string token = UserService.GetToken();
             client.Authenticator = new JwtAuthenticator(token);
             RestRequest request = new RestRequest(API_USERS_URL);
@@ -103,10 +105,88 @@ namespace TenmoClient.Views
                 }
             }
 
+
+            // Part 2 - User selects dollar amount and userId to transfer money to
             Console.Write("Please enter the Id of User you'd like to send TE bucks to: ");
-            int recipientId = int.Parse(Console.ReadLine());
+            //Recipient's user Id
+            int recipientUserId = int.Parse(Console.ReadLine());
             Console.Write("Please enter the amount: ");
-            decimal sendAmount = decimal.Parse(Console.ReadLine());
+            // Transfer amount
+            decimal transferAmount = decimal.Parse(Console.ReadLine());
+
+            //Get recipient's AccountId - Use GetAccounts method
+            RestRequest req = new RestRequest(API_ACCOUNT_URL);
+            IRestResponse<List<Account>> res = client.Get<List<Account>>(req);
+            List<Account> listOfAccounts = null;
+
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                ProcessErrorResponse(response);
+            }
+            else
+            {
+                listOfAccounts = res.Data;
+            }
+
+            int recipientAccountId = 0;
+            decimal recipientBalance = 0;
+            foreach(Account acct in listOfAccounts)
+            {
+                if (recipientUserId == acct.UserId)
+                {
+                    recipientAccountId = acct.AccountId;
+                    recipientBalance = acct.Balance;
+                }
+            }
+
+            //Get current user's id and balance
+            RestRequest request2 = new RestRequest(API_ACCOUNT_URL + userId);
+            IRestResponse<Account> response2 = client.Get<Account>(request2);
+            Account account = null;
+
+            if (response2.ResponseStatus != ResponseStatus.Completed || !response2.IsSuccessful)
+            {
+                ProcessErrorResponse(response2);
+            }
+            else
+            {
+                account = response2.Data;
+            }
+            //**********************************
+            decimal senderBalance = account.Balance;
+            int senderAccountId = account.AccountId;
+            // *********************************
+
+            // Here we are performing the transfer
+
+            //Create a copy of the list
+            List<Account> listOfAccts = new List<Account>();
+
+
+            //1. Create a list of two accounts, which are the sender and recipient
+            foreach (Account acct in listOfAccounts)
+            {
+                if (acct.AccountId == senderAccountId || acct.AccountId == recipientAccountId)
+                {
+                    listOfAccts.Add(acct);
+                }
+            }
+            //2. For the sender account, we have to set account.Balance = senderBalance - transferAmount
+
+            RestRequest rr = new RestRequest(API_ACCOUNT_URL + senderAccountId + "/transfer/" + recipientAccountId + "/" + senderBalance + "/" + 
+                recipientBalance + "/" + transferAmount);
+            rr.AddJsonBody(listOfAccts);
+            IRestResponse<List<Account>> re = client.Put<List<Account>>(rr);
+            List<Account> result = null;
+
+            //if (re.ResponseStatus != ResponseStatus.Completed || !re.IsSuccessful)
+            //{
+            //    ProcessErrorResponse(re);
+            //}
+            //else
+            //{
+            //    result = re.Data;
+            //}
 
             return MenuOptionResult.WaitAfterMenuSelection;
         }

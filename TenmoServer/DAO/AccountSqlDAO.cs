@@ -46,7 +46,7 @@ namespace TenmoServer.DAO
             {
                 conn.Open();
 
-                SqlCommand cmd = new SqlCommand("Select * from accounts Join users on accounts.user_id = users.user_id", conn);
+                SqlCommand cmd = new SqlCommand("Select * from accounts", conn);
                 SqlDataReader rdr = cmd.ExecuteReader();
 
                 while (rdr.Read())
@@ -57,24 +57,26 @@ namespace TenmoServer.DAO
             return listOfAccounts;
         }
 
-        //public Account TransferBucks()
-        //{
-        //    using (SqlConnection conn = new SqlConnection(connectionString))
-        //    {
-        //        conn.Open();
+        public bool TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount)
+        {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
 
-        //        SqlCommand cmd = new SqlCommand("begin transaction update accounts set balance = @senderBalance where account_id = @senderId;  " +
-        //            "update accounts set balance = @recipientBalance where account_id = @recipientId");
-        //        SqlDataReader rdr = cmd.ExecuteReader();
-        //        cmd.Parameters.AddWithValue("@senderBalance", "")
+                    SqlCommand cmd = new SqlCommand("Begin transaction Update accounts Set balance = @senderBalance where account_id = @senderId;  " +
+                        "update accounts set balance = @recipientBalance where account_id = @recipientId Commit transaction", conn);
+      
+                    cmd.Parameters.AddWithValue("@senderBalance", senderBalance - transferAmount);
+                    cmd.Parameters.AddWithValue("@senderId", senderAcctId);
+                    cmd.Parameters.AddWithValue("@recipientBalance", recipientBalance + transferAmount);
+                    cmd.Parameters.AddWithValue("@recipientId", recipientAcctId);
+                    SqlDataReader rdr = cmd.ExecuteReader();
 
-        //        if (rdr.Read())
-        //        {
-        //            listOfAccounts.Add(RowToObject(rdr));
-        //        }
-        //    }
-        //    return listOfAccounts;
-        //}
+                    return true;
+
+                }
+                return false;
+        }
 
 
 

@@ -36,5 +36,12 @@ namespace TenmoServer.Controllers
             return accountDAO.GetAllAccounts();
         }
 
+        [HttpPut("{senderAcctId}/transfer/{recipientAcctId}/{senderBalance}/{recipientBalance}/{transferAmount}")]
+        public bool TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount)
+        {
+            return accountDAO.TransferBucks(senderAcctId, recipientAcctId, senderBalance, recipientBalance, transferAmount);
+        }
+
+
     }
 }

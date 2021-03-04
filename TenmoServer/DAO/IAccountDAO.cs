@@ -7,5 +7,6 @@ namespace TenmoServer.DAO
     {
         Account GetAccount(int userId);
         List<Account> GetAllAccounts();
+        bool TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount);
     }
 }
