@@ -81,7 +81,6 @@ namespace TenmoClient.Views
             string pass = "";
             Console.Write(displayMessage);
             ConsoleKeyInfo key;
-
             do
             {
                 key = Console.ReadKey(true);

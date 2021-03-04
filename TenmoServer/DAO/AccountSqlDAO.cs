@@ -38,6 +38,27 @@ namespace TenmoServer.DAO
             }
         }
 
+        public List<Account> GetAllAccounts()
+        {
+            List<Account> listOfAccounts = new List<Account>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                SqlCommand cmd = new SqlCommand("Select * from accounts Join users on accounts.user_id = users.user_id", conn);
+                SqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    listOfAccounts.Add(RowToObject(rdr));
+                }
+            }
+            return listOfAccounts;
+        }
+
+
+
         private Account RowToObject(SqlDataReader rdr)
         {
             Account account = new Account();

@@ -2,12 +2,14 @@
 using RestSharp.Authenticators;
 using System;
 using TenmoClient.Data;
+using TenmoClient.Models;
 
 namespace TenmoClient
 {
     public class AuthService
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
+        //private readonly static string API_ACCOUNT_URL = "https://localhost:44315/accounts/";
         private readonly IRestClient client = new RestClient();
 
         //login endpoints
@@ -68,10 +70,19 @@ namespace TenmoClient
                 client.Authenticator = new JwtAuthenticator(response.Data.Token);
                 return response.Data;
             }
-
-
-
-
         }
+
+        //Not sure if we should have have this method in AuthService or MainMenu
+
+        //public decimal Balance()
+        //{
+            
+        //    RestRequest request = new RestRequest(API_ACCOUNT_URL + );
+        //    IRestResponse<Account> response = client.Get<Account>(request);
+
+        //    Account account = response.Data;
+
+        //    return account.Balance;
+        //}
     }
 }
