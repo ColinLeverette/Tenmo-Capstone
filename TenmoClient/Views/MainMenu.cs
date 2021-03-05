@@ -67,29 +67,33 @@ namespace TenmoClient.Views
             int userId = UserService.GetUserId();
             RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
-            List<Transfer> listOfSentTransfers = new List<Transfer>();
+            List<Transfer> listOfTransfers = response.Data;
+            
+
             RestRequest request2 = new RestRequest(API_ACCOUNT_URL + userId);
             IRestResponse<Account> response2 = client.Get<Account>(request2);
             Account account = response2.Data;
-
+            
 
 
             Console.WriteLine("------------------------------------");
-            Console.WriteLine("Transfer ID            From/To           Amount ");
+            Console.WriteLine("Transfer ID            From  /  To           Amount ");
 
             //Console.WriteLine($"{}");
 
             // loop thru the transfers and CW each transfer in list 
-            foreach (Transfer transfer in listOfSentTransfers)
+            foreach (Transfer transfer in listOfTransfers)
             {
-                if (account.AccountId == transfer.AccountFrom)
-                {
-                    Console.WriteLine($"{transfer.TransferId} From: -------     {transfer.Amount}");
-                }
-                if (account.AccountId == transfer.AccountTo)
-                {
-                    Console.WriteLine($"{transfer.TransferId} To: -------     {transfer.Amount}");
-                }
+
+                Console.WriteLine($"{transfer.TransferId}      From: User {transfer.AccountFrom}  to: User {transfer.AccountTo}      {transfer.Amount}");
+                //if (account.AccountId == transfer.AccountTo)
+                //{
+                //    Console.WriteLine($"{transfer.TransferId} From: -------     {transfer.Amount}");
+                //}
+                //if (account.AccountId == transfer.AccountFrom)
+                //{
+                //    Console.WriteLine($"{transfer.TransferId} To: -------     {transfer.Amount}");
+                //}
             }
                 
 
@@ -99,7 +103,7 @@ namespace TenmoClient.Views
             }
             else
             {
-                listOfSentTransfers = response.Data;
+                listOfTransfers = response.Data;
             }
             return MenuOptionResult.WaitAfterMenuSelection;
         }

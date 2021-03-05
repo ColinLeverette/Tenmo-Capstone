@@ -44,7 +44,7 @@ namespace TenmoServer.DAO
             using(SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                SqlCommand cmd = new SqlCommand("Select * from transfers where account_from = @accountId or transfer_type_id = 2;", conn);
+                SqlCommand cmd = new SqlCommand("Select * from transfers where account_from = @accountId or account_to = @accountId;", conn);
                 cmd.Parameters.AddWithValue("@accountId", accountUserId);
                 SqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())
