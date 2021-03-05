@@ -62,13 +62,45 @@ namespace TenmoClient.Views
 
         private MenuOptionResult ViewTransfers()
         {
-            Console.WriteLine("Not yet implemented!");
+            string token = UserService.GetToken();
+            client.Authenticator = new JwtAuthenticator(token);
+            int userId = UserService.GetUserId();
+            RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            List<Transfer> listOfSentTransfers = new List<Transfer>();
+
+
+
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                ProcessErrorResponse(response);
+            }
+            else
+            {
+                listOfSentTransfers = response.Data;
+            }
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
         private MenuOptionResult ViewRequests()
         {
-            Console.WriteLine("Not yet implemented!");
+            string token = UserService.GetToken();
+            client.Authenticator = new JwtAuthenticator(token);
+            int userId = UserService.GetUserId();
+            RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            List<Transfer> listOfReceivedTransfers = new List<Transfer>();
+
+
+
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                ProcessErrorResponse(response);
+            }
+            else
+            {
+                listOfReceivedTransfers = response.Data;
+            }
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
@@ -161,7 +193,6 @@ namespace TenmoClient.Views
             //Create a copy of the list
             List<Account> listOfAccts = new List<Account>();
 
-            Transfer newTransfer = new Transfer();
 
             //1. Create a list of two accounts, which are the sender and recipient
             foreach (Account acct in listOfAccounts)
@@ -183,18 +214,31 @@ namespace TenmoClient.Views
                 Console.WriteLine($"Your updated balance after transaction: {updatedBalance:c} ");
                 Console.WriteLine("Thank you for doing business with Tenmo");  // TM? 
 
-             //  newTransfer.TransferId = 0;
-                
-                //newTransfer.TransferStatusId;
-                //    newTransfer.AccountTo;
-                //newTransfer.AccountFrom;
-                //newTransfer.Amount;
-                //new
 
 
-                //RestRequest transferRequest = new RestRequest(API_TRANSFER_URL + newTransfer);
-                //transferRequest.AddJsonBody(newTransfer);
-                //IRestResponse<Transfer> transferResponse = client.Post<Transfer>(transferRequest);
+
+
+                Transfer newTransfer = new Transfer();
+                newTransfer.TransferStatusId = 2;
+                newTransfer.TransferTypeId = 1;
+                newTransfer.AccountTo = recipientAccountId;
+                newTransfer.AccountFrom = senderAccountId;
+                newTransfer.Amount = transferAmount;
+
+                RestRequest transferRequest = new RestRequest(API_TRANSFER_URL);
+                transferRequest.AddJsonBody(newTransfer);
+                IRestResponse<Transfer> transferResponse = client.Post<Transfer>(transferRequest);
+                Transfer dataFromPost = new Transfer();
+
+                if (transferResponse.ResponseStatus != ResponseStatus.Completed || !transferResponse.IsSuccessful)
+                {
+                    ProcessErrorResponse(transferResponse);
+                }
+                else
+                {
+                    dataFromPost = transferResponse.Data;
+                }
+
 
             }
             else

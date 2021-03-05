@@ -23,10 +23,22 @@ namespace TenmoServer.Controllers
             this.transferDAO = transferDAO;
         }
 
-        [HttpPost("{newTransfer}")]
+        [HttpPost]
         public int InsertTransfer(Transfer newTransfer)
         {
             return transferDAO.InsertTransfer(newTransfer);
+        }
+
+        [HttpGet("{accountId}/sent")]
+        public List<Transfer> GetMyTransfersSent(int accountId)
+        {
+            return transferDAO.GetMyTransfers(accountId);
+        }
+
+        [HttpGet("{accountId}/received")]
+        public List<Transfer> GetMyTransferRequests(int accountId)
+        {
+            return transferDAO.GetMyTransferRequests(accountId);
         }
 
 

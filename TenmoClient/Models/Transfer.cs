@@ -13,6 +13,11 @@ namespace TenmoClient.Models
         public int AccountTo { get; set; }
         public decimal Amount { get; set; }
 
+        public Transfer()
+        {
+
+        }
+
 
     }
 }
