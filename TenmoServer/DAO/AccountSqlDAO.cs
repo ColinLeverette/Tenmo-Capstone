@@ -79,8 +79,6 @@ namespace TenmoServer.DAO
         }
 
 
-
-
         private Account RowToObject(SqlDataReader rdr)
         {
             Account account = new Account();

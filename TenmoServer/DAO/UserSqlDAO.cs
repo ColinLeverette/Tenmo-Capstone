@@ -111,6 +111,31 @@ namespace TenmoServer.DAO
             return GetUser(username);
         }
 
+
+        public User GetUsername(int accountId)
+        {
+            User user = new User();
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                //SqlCommand cmd = new SqlCommand("Select * from users Join accounts on users.user_id = accounts.user_id" +
+                //    "where accounts.account_id = @accountId", conn);
+                SqlCommand cmd = new SqlCommand("Select * from users where user_id in (Select user_id from accounts where account_id = @accountId)", conn);
+                cmd.Parameters.AddWithValue("@accountId", accountId);
+                SqlDataReader rdr = cmd.ExecuteReader();
+
+                if (rdr.Read())
+                {
+                    user = GetUserFromReader(rdr);
+                }
+            }
+            return user;
+        }
+
+
+
+
+
         private User GetUserFromReader(SqlDataReader reader)
         {
             User u = new User()

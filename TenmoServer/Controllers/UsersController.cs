@@ -28,6 +28,12 @@ namespace TenmoServer.Controllers
             return userDAO.GetUsers();
         }
 
+        [HttpGet("account/{accountId}")]
+        public User GetUsername(int accountId)
+        {
+            return userDAO.GetUsername(accountId);
+        }
+
     }
 }
 

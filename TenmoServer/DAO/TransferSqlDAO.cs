@@ -55,6 +55,24 @@ namespace TenmoServer.DAO
             return listOfTransfers;
         }
 
+        public Transfer GetTransferById(int transferId)
+        {
+            Transfer transfer = new Transfer();
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("Select * from transfers where transfer_id = @transferId;", conn);
+                cmd.Parameters.AddWithValue("@transferId", transferId);
+                SqlDataReader rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    transfer = RowToObject(rdr);
+                }
+            }
+            return transfer;
+        }
+
+
         public List<Transfer> GetMyTransferRequests(int accountUserId)
         {
             List<Transfer> listOfTransfers = new List<Transfer>();
@@ -78,8 +96,8 @@ namespace TenmoServer.DAO
             Transfer transfer = new Transfer();
 
             transfer.TransferId = Convert.ToInt32(rdr["transfer_id"]);
-            transfer.TransferTypeId = Convert.ToInt32(rdr["transfer_type_id"]);
-            transfer.TransferStatusId = Convert.ToInt32(rdr["transfer_status_id"]);
+            transfer.TransferTypeId = (TransferType)Convert.ToInt32(rdr["transfer_type_id"]);
+            transfer.TransferStatusId = (TransferStatus)Convert.ToInt32(rdr["transfer_status_id"]);
             transfer.AccountFrom = Convert.ToInt32(rdr["account_from"]);
             transfer.AccountTo = Convert.ToInt32(rdr["account_to"]);
             transfer.Amount = Convert.ToDecimal(rdr["amount"]);

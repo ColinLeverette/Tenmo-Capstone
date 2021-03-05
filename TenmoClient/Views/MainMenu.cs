@@ -84,8 +84,29 @@ namespace TenmoClient.Views
             // loop thru the transfers and CW each transfer in list 
             foreach (Transfer transfer in listOfTransfers)
             {
+                // GET USERNAMES!!!!!!!!!!!!
 
-                Console.WriteLine($"{transfer.TransferId}      From: User {transfer.AccountFrom}  to: User {transfer.AccountTo}      {transfer.Amount}");
+                //Get From username
+                int accountFromId1 = transfer.AccountFrom;
+                RestRequest requestAccountFrom1 = new RestRequest(API_USERS_URL + "account/" + accountFromId1);
+                IRestResponse<User> response41 = client.Get<User>(requestAccountFrom1);
+                User usernameFrom1 = response41.Data;
+
+
+                //Get To username
+                int accountToId1 = transfer.AccountTo;
+                RestRequest requestAccountTo1 = new RestRequest(API_USERS_URL + "account/" + accountToId1);
+                IRestResponse<User> response51 = client.Get<User>(requestAccountTo1);
+                User usernameTo1 = response51.Data;
+
+
+                //////////////////////////////////////////////////////
+
+
+
+
+
+                Console.WriteLine($"{transfer.TransferId}      From: User {usernameFrom1.Username}  to: User {usernameTo1.Username}      {transfer.Amount}");
                 //if (account.AccountId == transfer.AccountTo)
                 //{
                 //    Console.WriteLine($"{transfer.TransferId} From: -------     {transfer.Amount}");
@@ -95,16 +116,56 @@ namespace TenmoClient.Views
                 //    Console.WriteLine($"{transfer.TransferId} To: -------     {transfer.Amount}");
                 //}
             }
-                
 
-            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
-            {
-                ProcessErrorResponse(response);
-            }
-            else
-            {
-                listOfTransfers = response.Data;
-            }
+            Console.WriteLine("-------------------");
+            Console.Write("Please enter transfer ID to view details: ");
+            int transferId = int.Parse(Console.ReadLine());
+
+
+
+            // Part 6 - Transfer Details Page
+
+            Console.WriteLine("------------------------------------------");
+            Console.WriteLine("Transfer Details");
+            Console.WriteLine("------------------------------------------");
+
+            string token2 = UserService.GetToken();
+            client.Authenticator = new JwtAuthenticator(token2);
+
+            RestRequest request3 = new RestRequest(API_TRANSFER_URL + "lookup/" + transferId);
+            IRestResponse<Transfer> response3 = client.Get<Transfer>(request3);
+            Transfer transfer3 = response3.Data;
+
+            //Print out all of the transfer details
+            Console.WriteLine($"Id: {transfer3.TransferId}");
+
+            //Get From username
+            int accountFromId = transfer3.AccountFrom;
+            RestRequest requestAccountFrom = new RestRequest(API_USERS_URL + "account/" + accountFromId);
+            IRestResponse<User> response4 = client.Get<User>(requestAccountFrom);
+            User usernameFrom = response4.Data;
+
+            Console.WriteLine($"From: {usernameFrom.Username}");
+
+            //Get To username
+            int accountToId = transfer3.AccountTo;
+            RestRequest requestAccountTo = new RestRequest(API_USERS_URL + "account/" + accountToId);
+            IRestResponse<User> response5 = client.Get<User>(requestAccountTo);
+            User usernameTo = response5.Data;
+
+            Console.WriteLine($"To: {usernameTo.Username}");
+            Console.WriteLine($"Type: {transfer3.TransferTypeId}");
+            Console.WriteLine($"Status: {transfer3.TransferStatusId}");
+            Console.WriteLine($"Amount: {transfer3.Amount:c}");
+
+
+
+
+
+
+
+
+
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
@@ -241,8 +302,8 @@ namespace TenmoClient.Views
                 Console.WriteLine("Thank you for doing business with Tenmo");  // TM? 
 
                 Transfer newTransfer = new Transfer();
-                newTransfer.TransferStatusId = 2;
-                newTransfer.TransferTypeId = 2;
+                newTransfer.TransferStatusId = (TransferStatus)2;
+                newTransfer.TransferTypeId = (TransferType)2;
                 newTransfer.AccountTo = recipientAccountId;
                 newTransfer.AccountFrom = senderAccountId;
                 newTransfer.Amount = transferAmount;
