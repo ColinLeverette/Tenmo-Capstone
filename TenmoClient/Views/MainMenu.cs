@@ -13,7 +13,7 @@ namespace TenmoClient.Views
 {
     public class MainMenu : ConsoleMenu
     {
-
+        private readonly static string API_TRANSFER_URL = "https://localhost:44315/transfers/";
         private readonly static string API_ACCOUNT_URL = "https://localhost:44315/accounts/";
         private readonly static string API_USERS_URL = "https://localhost:44315/users/";
         private readonly IRestClient client = new RestClient();
@@ -105,7 +105,6 @@ namespace TenmoClient.Views
                 }
             }
 
-
             // Part 2 - User selects dollar amount and userId to transfer money to
             Console.Write("Please enter the Id of User you'd like to send TE bucks to: ");
             //Recipient's user Id
@@ -162,6 +161,7 @@ namespace TenmoClient.Views
             //Create a copy of the list
             List<Account> listOfAccts = new List<Account>();
 
+            Transfer newTransfer = new Transfer();
 
             //1. Create a list of two accounts, which are the sender and recipient
             foreach (Account acct in listOfAccounts)
@@ -171,14 +171,37 @@ namespace TenmoClient.Views
                     listOfAccts.Add(acct);
                 }
             }
-            //2. For the sender account, we have to set account.Balance = senderBalance - transferAmount
-
-            RestRequest rr = new RestRequest(API_ACCOUNT_URL + senderAccountId + "/transfer/" + recipientAccountId + "/" + senderBalance + "/" + 
+            if (senderBalance >= transferAmount)
+            {
+                //2. For the sender account, we have to set account.Balance = senderBalance - transferAmount
+                RestRequest rr = new RestRequest(API_ACCOUNT_URL + senderAccountId + "/transfer/" + recipientAccountId + "/" + senderBalance + "/" +
                 recipientBalance + "/" + transferAmount);
-            rr.AddJsonBody(listOfAccts);
-            IRestResponse<List<Account>> re = client.Put<List<Account>>(rr);
-            List<Account> result = null;
+                rr.AddJsonBody(listOfAccts);
+                IRestResponse<List<Account>> re = client.Put<List<Account>>(rr);
+                List<Account> result = null;
+                decimal updatedBalance = senderBalance - transferAmount;
+                Console.WriteLine($"Your updated balance after transaction: {updatedBalance:c} ");
+                Console.WriteLine("Thank you for doing business with Tenmo");  // TM? 
 
+             //  newTransfer.TransferId = 0;
+                
+                //newTransfer.TransferStatusId;
+                //    newTransfer.AccountTo;
+                //newTransfer.AccountFrom;
+                //newTransfer.Amount;
+                //new
+
+
+                //RestRequest transferRequest = new RestRequest(API_TRANSFER_URL + newTransfer);
+                //transferRequest.AddJsonBody(newTransfer);
+                //IRestResponse<Transfer> transferResponse = client.Post<Transfer>(transferRequest);
+
+            }
+            else
+            {
+                Console.WriteLine("You do not have enough TE Bucks to complete transaction");
+            }
+           
             //if (re.ResponseStatus != ResponseStatus.Completed || !re.IsSuccessful)
             //{
             //    ProcessErrorResponse(re);
