@@ -17,22 +17,24 @@ namespace TenmoServer.DAO
         }
 
 
-        public int InsertTransfer(Transfer newTransfer)
+        public Transfer InsertTransfer(Transfer newTransfer)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
                 // HARD CODING NUMBERS FOR NOW, maybe refactor
-                SqlCommand cmd = new SqlCommand("INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (@transferTypeId, @transferStatusId, @accountFrom, @AccountTo, @Amount); @@identity;", conn);
+                SqlCommand cmd = new SqlCommand("INSERT INTO transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (@transferTypeId, @transferStatusId, @accountFrom, @AccountTo, @Amount); select @@identity;", conn);
                 cmd.Parameters.AddWithValue("@transferTypeId", newTransfer.TransferTypeId);
-                cmd.Parameters.AddWithValue("@transferStatus", newTransfer.TransferStatusId);
+                cmd.Parameters.AddWithValue("@transferStatusId", newTransfer.TransferStatusId);
                 cmd.Parameters.AddWithValue("@accountFrom", newTransfer.AccountFrom);
                 cmd.Parameters.AddWithValue("@accountTo", newTransfer.AccountTo);
                 cmd.Parameters.AddWithValue("@amount", newTransfer.Amount);
 
+                
                 int newId = Convert.ToInt32(cmd.ExecuteScalar());
-                return newId;
-
+                newTransfer.TransferId = newId;
+                return newTransfer;
+                
             }
         }
 
@@ -42,7 +44,7 @@ namespace TenmoServer.DAO
             using(SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                SqlCommand cmd = new SqlCommand("Select * from transfers where account_from = @accountId;", conn);
+                SqlCommand cmd = new SqlCommand("Select * from transfers where account_from = @accountId or transfer_type_id = 2;", conn);
                 cmd.Parameters.AddWithValue("@accountId", accountUserId);
                 SqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())

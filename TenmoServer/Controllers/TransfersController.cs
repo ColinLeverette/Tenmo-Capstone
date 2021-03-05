@@ -24,22 +24,29 @@ namespace TenmoServer.Controllers
         }
 
         [HttpPost]
-        public int InsertTransfer(Transfer newTransfer)
+        public Transfer InsertTransfer(Transfer newTransfer)
         {
             return transferDAO.InsertTransfer(newTransfer);
         }
 
-        [HttpGet("{accountId}/sent")]
-        public List<Transfer> GetMyTransfersSent(int accountId)
+       [HttpGet("{userId}")]
+        public List<Transfer> GetMyTransfers(int userId)
         {
-            return transferDAO.GetMyTransfers(accountId);
+            return transferDAO.GetMyTransfers(userId);
         }
 
-        [HttpGet("{accountId}/received")]
-        public List<Transfer> GetMyTransferRequests(int accountId)
-        {
-            return transferDAO.GetMyTransferRequests(accountId);
-        }
+
+        //[HttpGet("{accountId}/sent")]
+        //public List<Transfer> GetMyTransfersSent(int accountId)
+        //{
+        //    return transferDAO.GetMyTransfers(accountId);
+        //}
+
+        //[HttpGet("{accountId}/received")]
+        //public List<Transfer> GetMyTransferRequests(int accountId)
+        //{
+        //    return transferDAO.GetMyTransferRequests(accountId);
+        //}
 
 
 

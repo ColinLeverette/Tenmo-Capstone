@@ -68,8 +68,30 @@ namespace TenmoClient.Views
             RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
             IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
             List<Transfer> listOfSentTransfers = new List<Transfer>();
+            RestRequest request2 = new RestRequest(API_ACCOUNT_URL + userId);
+            IRestResponse<Account> response2 = client.Get<Account>(request2);
+            Account account = response2.Data;
 
 
+
+            Console.WriteLine("------------------------------------");
+            Console.WriteLine("Transfer ID            From/To           Amount ");
+
+            //Console.WriteLine($"{}");
+
+            // loop thru the transfers and CW each transfer in list 
+            foreach (Transfer transfer in listOfSentTransfers)
+            {
+                if (account.AccountId == transfer.AccountFrom)
+                {
+                    Console.WriteLine($"{transfer.TransferId} From: -------     {transfer.Amount}");
+                }
+                if (account.AccountId == transfer.AccountTo)
+                {
+                    Console.WriteLine($"{transfer.TransferId} To: -------     {transfer.Amount}");
+                }
+            }
+                
 
             if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
             {
@@ -214,13 +236,9 @@ namespace TenmoClient.Views
                 Console.WriteLine($"Your updated balance after transaction: {updatedBalance:c} ");
                 Console.WriteLine("Thank you for doing business with Tenmo");  // TM? 
 
-
-
-
-
                 Transfer newTransfer = new Transfer();
                 newTransfer.TransferStatusId = 2;
-                newTransfer.TransferTypeId = 1;
+                newTransfer.TransferTypeId = 2;
                 newTransfer.AccountTo = recipientAccountId;
                 newTransfer.AccountFrom = senderAccountId;
                 newTransfer.Amount = transferAmount;
@@ -238,7 +256,6 @@ namespace TenmoClient.Views
                 {
                     dataFromPost = transferResponse.Data;
                 }
-
 
             }
             else
