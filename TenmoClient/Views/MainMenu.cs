@@ -38,150 +38,153 @@ namespace TenmoClient.Views
 
         private MenuOptionResult ViewBalance()
         {
+            //Get userId
             int userId = UserService.GetUserId();
 
+            //Use userId to get the accountId for user
             Account account = methods.GetUserAccount(userId);
           
+            //Print out current balance 
             Console.WriteLine($"Your current account balance is: {account.Balance:c}");
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
         private MenuOptionResult ViewTransfers()
         {
-            string token = UserService.GetToken();
-            client.Authenticator = new JwtAuthenticator(token);
+            //Get userId of logged in user
             int userId = UserService.GetUserId();
-            RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
-            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
-            List<Transfer> listOfTransfers = response.Data;
 
+            //Use that userId to retrieve a list of transfers where user was either sender or recipient
+            List<Transfer> listOfTransfers = methods.GetListOfTransfers(userId);
+
+            //Also user that userId to get the account for that user
             Account account = methods.GetUserAccount(userId);
             
+            //Display menu
             Console.WriteLine("------------------------------------");
             Console.WriteLine("Transfer ID            From  /  To           Amount ");
 
-            // loop thru the transfers and CW each transfer in list 
-            foreach (Transfer transfer in listOfTransfers)
+            //Display each transfer in list 
+            foreach (Transfer t in listOfTransfers)
             {
                 //Get From username
-                int accountFromAccountId = transfer.AccountFrom;
+                int accountFromAccountId = t.AccountFrom;
                 User userFrom = methods.GetUser(accountFromAccountId);
 
                 //Get To username
-                int accountToAccountId = transfer.AccountTo;
+                int accountToAccountId = t.AccountTo;
                 User userTo = methods.GetUser(accountToAccountId);
-               
-                //////////////////////////////////////////////////////
 
-                Console.WriteLine($"{transfer.TransferId}              From: {userFrom.Username}  to:  {userTo.Username}      {transfer.Amount}");
+                Console.WriteLine($"{t.TransferId}              From: {userFrom.Username}  to:  {userTo.Username}      {t.Amount}");
             }
 
+            Console.WriteLine("");
             Console.WriteLine("-------------------");
-            
-            //return result;
+            Console.WriteLine("");
 
 
-            // FIX TRY CATCH TO ONLY ALLOW ENTERING DISPLAYED ITEMS 
+            // TRY/CATCH for when users are looking up transfer Ids
 
-
-            bool gotTransferId = false;
+            int gotTransferId = 0;
             int transferId = 0;
-            while (!gotTransferId)
+            int counter = 0;
+            int maxAttempts = 3;
+            while (gotTransferId != 1)
             {
                 try
                 {
-                    Console.Write("Please enter transfer ID to view details: ");
-                     transferId = int.Parse(Console.ReadLine());
-                    gotTransferId = true;
+                    if (counter < maxAttempts)
+                    {
+                        Console.Write("Please enter transfer ID to view details: ");
+                    }
+                    transferId = int.Parse(Console.ReadLine());
+                    for (int i = 0; i < listOfTransfers.Count; i++)
+                    {
+                        if (listOfTransfers[i].TransferId == transferId)
+                        {
+                            gotTransferId = 1;
+                        }
+                    }
+
+                        if ( (counter < maxAttempts) && (gotTransferId == 0) )
+                        {
+                            Console.WriteLine("That transfer ID does not exist. Please enter a valid ID.");
+                            counter++;
+                            Console.WriteLine($"You have {3 - counter} attempts left.");
+                        }
+                        else if (counter == maxAttempts)
+                        {
+                            Console.WriteLine("You are being logged out ... (for your own good).");
+                            Logout();
+                            return MenuOptionResult.ExitAfterSelection;
+                    }
                 }
                 catch
                 {
-                    Console.WriteLine("You entered an invalid value, please try again");
+                    if (counter < maxAttempts)
+                        {
+                            Console.WriteLine("You entered an invalid ID, please try again.");
+                            counter++;
+                            Console.WriteLine($"You have {3 - counter} attempts left.");
+                        }
+                    if (counter == maxAttempts)
+                    {
+                        Console.WriteLine("You are being logged out ... (for your own good).");
+                        Logout();
+                        return MenuOptionResult.ExitAfterSelection;
+                    }
                 }
             }
-            // Part 6 - Transfer Details Page
+
+
+
+            // Transfer Details Page
 
             Console.WriteLine("------------------------------------------");
             Console.WriteLine("Transfer Details");
             Console.WriteLine("------------------------------------------");
 
-            string token2 = UserService.GetToken();
-            client.Authenticator = new JwtAuthenticator(token2);
-
-            RestRequest request3 = new RestRequest(API_TRANSFER_URL + "lookup/" + transferId);
-            IRestResponse<Transfer> response3 = client.Get<Transfer>(request3);
-            Transfer transfer3 = response3.Data;
-
-            //Print out all of the transfer details
-            Console.WriteLine($"Id: {transfer3.TransferId}");
+            //Get transfer properties by passing in a transfer ID
+            Transfer transfer = methods.GetTransferFromTransferId(transferId);
 
             //Get From username
-            int accountFromId = transfer3.AccountFrom;
-            RestRequest requestAccountFrom = new RestRequest(API_USERS_URL + "account/" + accountFromId);
-            IRestResponse<User> response4 = client.Get<User>(requestAccountFrom);
-            User usernameFrom = response4.Data;
-
-            Console.WriteLine($"From: {usernameFrom.Username}");
+            int accountFromId = transfer.AccountFrom;
+            User usernameFrom = methods.GetUser(accountFromId);
 
             //Get To username
-            int accountToId = transfer3.AccountTo;
-            RestRequest requestAccountTo = new RestRequest(API_USERS_URL + "account/" + accountToId);
-            IRestResponse<User> response5 = client.Get<User>(requestAccountTo);
-            User usernameTo = response5.Data;
+            int accountToId = transfer.AccountTo;
+            User usernameTo = methods.GetUser(accountToId);
 
+            Console.WriteLine($"Id: {transfer.TransferId}");
+            Console.WriteLine($"From: {usernameFrom.Username}");
             Console.WriteLine($"To: {usernameTo.Username}");
-            Console.WriteLine($"Type: {transfer3.TransferTypeId}");
-            Console.WriteLine($"Status: {transfer3.TransferStatusId}");
-            Console.WriteLine($"Amount: {transfer3.Amount:c}");
+            Console.WriteLine($"Type: {transfer.TransferTypeId}");
+            Console.WriteLine($"Status: {transfer.TransferStatusId}");
+            Console.WriteLine($"Amount: {transfer.Amount:c}");
 
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
         private MenuOptionResult ViewRequests()
         {
-            string token = UserService.GetToken();
-            client.Authenticator = new JwtAuthenticator(token);
-            int userId = UserService.GetUserId();
-            RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
-            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
-            List<Transfer> listOfReceivedTransfers = new List<Transfer>();
-
-            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
-            {
-                MainMenuMethods.ProcessErrorResponse(response);
-            }
-            else
-            {
-                listOfReceivedTransfers = response.Data;
-            }
+            Console.WriteLine("Coming soon.");
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 
-        // 4.1: Show a list of users to send TE Bucks to
         private MenuOptionResult SendTEBucks()
         {
-            // Part 1 - List out all userIds and userNames
-            string token = UserService.GetToken();
-            client.Authenticator = new JwtAuthenticator(token);
-            RestRequest request = new RestRequest(API_USERS_URL);
-            IRestResponse<List<User>> response = client.Get<List<User>>(request);
-            List<User> user = new List<User>();
+            // Get a list of all users
+            List<User> listOfUsers = methods.GetListOfUsers();
+            
+            // Get logged-in user's Id
             int userId = UserService.GetUserId();
-
-            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
-            {
-                MainMenuMethods.ProcessErrorResponse(response);
-            }
-            else
-            {
-                user = response.Data;
-            }
 
             Console.WriteLine("------------------------------------");
             Console.WriteLine("Users ID           Name");
             Console.WriteLine("------------------------------------");
 
-            foreach (User u in user)
+            //Print out all users that are not you
+            foreach (User u in listOfUsers)
             {
                 if (u.UserId != userId)
                 {
@@ -190,77 +193,72 @@ namespace TenmoClient.Views
             }
 
 
-            //bool gotTransferId = false;
-            //int transferId = 0;
-            //while (!gotTransferId)
-            //{
-            //    try
-            //    {
-            //        Console.Write("Please enter transfer ID to view details: ");
-            //        transferId = int.Parse(Console.ReadLine());
-            //        gotTransferId = true;
-            //    }
-            //    catch
-            //    {
-            //        Console.WriteLine("You entered an invalid value, please try again");
-            //    }
-            //}
-
-
-            // Part 2 - User selects dollar amount and userId to transfer money to
-            bool gotRecipient = false;
+            // User selects dollar amount and userId to transfer money to
+            int maxAttempts = 3;
             int recipientUserId = 0;
-            while (!gotRecipient)
+            int counter = 0;
+            int gotrecipientUserId = 0;
+            while (gotrecipientUserId != 1)
             {
                 try
                 {
-                    Console.Write("Please enter the Id of User you'd like to send TE bucks to: ");
+                    if (counter < maxAttempts)
+                    {
+                        Console.Write("Please enter the Id of the user you'd like to send TE bucks to: ");
+                    }
+
                     recipientUserId = int.Parse(Console.ReadLine());
-                    gotRecipient = true;
+                    for (int i = 0; i < listOfUsers.Count; i++)
+                    {
+                        if (listOfUsers[i].UserId == recipientUserId)
+                        {
+                            gotrecipientUserId = 1;
+                        }
+                    }
+
+                    if ((counter < maxAttempts) && (gotrecipientUserId == 0))
+                    {
+                        Console.WriteLine("That transfer ID does not exist. Please enter a valid ID.");
+                        counter++;
+                        Console.WriteLine($"You have {3 - counter} attempts left.");
+                    }
+                    else if (counter == maxAttempts)
+                    {
+                        Console.WriteLine("You are being logged out ... (for your own good).");
+                        Logout();
+                        return MenuOptionResult.ExitAfterSelection;
+                    }
                 }
+
                 catch
                 {
-                    Console.WriteLine("You entered an invalid User ID, please try again");
+                    if (counter < maxAttempts)
+                    {
+                        Console.WriteLine("You entered an invalid ID, please try again.");
+                        counter++;
+                        Console.WriteLine($"You have {3 - counter} attempts left.");
+                    }
+                    if (counter == maxAttempts)
+                    {
+                        Console.WriteLine("You are being logged out ... (for your own good).");
+                        Logout();
+                        return MenuOptionResult.ExitAfterSelection;
+                    }
                 }
             }
-            
 
-            // FIX TRY CATCH TO ONLY ALLOW DISPLAYED VALUES
+            // Try/Catch to verify that user is selecting a valid user Id
 
+            //Get current users's balance
+            Account currentUserAccount = methods.GetUserAccount(userId);
+            decimal currentUserBalance = currentUserAccount.Balance;
 
-            //Recipient's user Id
-            bool gotTransferAmount = false;
-            decimal transferAmount = 0;
-            while (!gotTransferAmount)
-            {
-                try
-                {
-                    Console.Write("Please enter the amount: ");
-                     transferAmount = decimal.Parse(Console.ReadLine());
-                    gotTransferAmount = true;
-                }
-                catch
-                {
-                    Console.WriteLine("You entered an invalid amount, please try again");
-                }
-            }
-            
-            // Transfer amount
-            
+            Console.Write("Enter Amount: ");
+            decimal transferAmount = Decimal.Parse(Console.ReadLine());
+
 
             //Get recipient's AccountId - Use GetAccounts method
-            RestRequest req = new RestRequest(API_ACCOUNT_URL);
-            IRestResponse<List<Account>> res = client.Get<List<Account>>(req);
-            List<Account> listOfAccounts = null;
-
-            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
-            {
-                MainMenuMethods.ProcessErrorResponse(response);
-            }
-            else
-            {
-                listOfAccounts = res.Data;
-            }
+            List<Account> listOfAccounts = methods.GetListOfAccounts();
 
             int recipientAccountId = 0;
             decimal recipientBalance = 0;
@@ -298,11 +296,8 @@ namespace TenmoClient.Views
             if (senderBalance >= transferAmount)
             {
                 //2. For the sender account, we have to set account.Balance = senderBalance - transferAmount
-                RestRequest rr = new RestRequest(API_ACCOUNT_URL + senderAccountId + "/transfer/" + recipientAccountId + "/" + senderBalance + "/" +
-                recipientBalance + "/" + transferAmount);
-                rr.AddJsonBody(listOfAccts);
-                IRestResponse<List<Account>> re = client.Put<List<Account>>(rr);
-                List<Account> result = null;
+                methods.TransferBucks(senderAccountId, recipientAccountId, senderBalance, recipientBalance, transferAmount, listOfAccts);
+
                 decimal updatedBalance = senderBalance - transferAmount;
                 Console.WriteLine($"Your updated balance after transaction: {updatedBalance:c} ");
                 Console.WriteLine("Thank you for doing business with Tenmo");  // TM? 
@@ -314,35 +309,12 @@ namespace TenmoClient.Views
                 newTransfer.AccountFrom = senderAccountId;
                 newTransfer.Amount = transferAmount;
 
-                RestRequest transferRequest = new RestRequest(API_TRANSFER_URL);
-                transferRequest.AddJsonBody(newTransfer);
-                IRestResponse<Transfer> transferResponse = client.Post<Transfer>(transferRequest);
-                Transfer dataFromPost = new Transfer();
-
-                if (transferResponse.ResponseStatus != ResponseStatus.Completed || !transferResponse.IsSuccessful)
-                {
-                    MainMenuMethods.ProcessErrorResponse(transferResponse);
-                }
-                else
-                {
-                    dataFromPost = transferResponse.Data;
-                }
-
+                Transfer transferReturned = methods.CreateTransfer(newTransfer);
             }
             else
             {
                 Console.WriteLine("You do not have enough TE Bucks to complete transaction");
             }
-           
-            //if (re.ResponseStatus != ResponseStatus.Completed || !re.IsSuccessful)
-            //{
-            //    ProcessErrorResponse(re);
-            //}
-            //else
-            //{
-            //    result = re.Data;
-            //}
-
             return MenuOptionResult.WaitAfterMenuSelection;
         }
 

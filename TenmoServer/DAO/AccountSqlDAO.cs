@@ -57,7 +57,7 @@ namespace TenmoServer.DAO
             return listOfAccounts;
         }
 
-        public bool TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount)
+        public void TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount)
         {
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
@@ -72,10 +72,7 @@ namespace TenmoServer.DAO
                     cmd.Parameters.AddWithValue("@recipientId", recipientAcctId);
                     SqlDataReader rdr = cmd.ExecuteReader();
 
-                    return true;
-
                 }
-                return false;
         }
 
 

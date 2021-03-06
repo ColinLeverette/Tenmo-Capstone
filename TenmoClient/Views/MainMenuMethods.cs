@@ -56,6 +56,104 @@ namespace TenmoClient.Views
         }
 
 
+        public List<Transfer> GetListOfTransfers(int userId)
+        {
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_TRANSFER_URL + userId);
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            List<Transfer> listOfTransfers = new List<Transfer>();
+
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                MainMenuMethods.ProcessErrorResponse(response);
+            }
+            else
+            {
+                listOfTransfers= response.Data;
+            }
+            return listOfTransfers;            
+        }
+
+        public Transfer GetTransferFromTransferId (int transferId)
+        {
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_TRANSFER_URL + "lookup/" + transferId);
+            IRestResponse<Transfer> response = client.Get<Transfer>(request);
+            Transfer transfer = new Transfer();
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                MainMenuMethods.ProcessErrorResponse(response);
+            }
+            else
+            {
+                transfer = response.Data;
+            }
+            return transfer;
+        }
+        
+
+        public List<User> GetListOfUsers()
+        {
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_USERS_URL);
+            IRestResponse<List<User>> response = client.Get<List<User>>(request);
+            List<User> listOfUsers = new List<User>();
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                MainMenuMethods.ProcessErrorResponse(response);
+            }
+            else
+            {
+                listOfUsers = response.Data;
+            }
+            return listOfUsers;
+        }
+
+        public List<Account> GetListOfAccounts()
+        {
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_ACCOUNT_URL);
+            IRestResponse<List<Account>> response = client.Get<List<Account>>(request);
+            List<Account> listOfAccounts = new List<Account>();
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                MainMenuMethods.ProcessErrorResponse(response);
+            }
+            else
+            {
+                listOfAccounts = response.Data;
+            }
+            return listOfAccounts;
+        }
+
+
+        public void TransferBucks(int senderAccountId, int recipientAccountId, decimal senderBalance, decimal recipientBalance, decimal transferAmount, List<Account> listOfAccts)
+        {
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_ACCOUNT_URL + senderAccountId + "/transfer/" + recipientAccountId + "/" + senderBalance + "/" +
+                recipientBalance + "/" + transferAmount);
+            request.AddJsonBody(listOfAccts);
+  
+        }
+
+        public Transfer CreateTransfer(Transfer transfer)
+        {
+            client.Authenticator = new JwtAuthenticator(token);
+            RestRequest request = new RestRequest(API_TRANSFER_URL);
+            request.AddJsonBody(transfer);
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
+            Transfer returnTransfer = new Transfer();
+            if (response.ResponseStatus != ResponseStatus.Completed || !response.IsSuccessful)
+            {
+                MainMenuMethods.ProcessErrorResponse(response);
+            }
+            else
+            {
+                returnTransfer = response.Data;
+            }
+            return returnTransfer;
+        }
+
 
         public static void ProcessErrorResponse(IRestResponse response)
         {

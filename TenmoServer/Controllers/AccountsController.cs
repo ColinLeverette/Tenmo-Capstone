@@ -23,7 +23,6 @@ namespace TenmoServer.Controllers
             this.accountDAO = accountDAO;
         }
 
-        //[Authorize]
         [HttpGet("{userId}")]
         public Account GetAccount(int userId)
         {
@@ -37,9 +36,9 @@ namespace TenmoServer.Controllers
         }
 
         [HttpPut("{senderAcctId}/transfer/{recipientAcctId}/{senderBalance}/{recipientBalance}/{transferAmount}")]
-        public bool TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount)
+        public void TransferBucks(int senderAcctId, int recipientAcctId, decimal senderBalance, decimal recipientBalance, decimal transferAmount)
         {
-            return accountDAO.TransferBucks(senderAcctId, recipientAcctId, senderBalance, recipientBalance, transferAmount);
+            accountDAO.TransferBucks(senderAcctId, recipientAcctId, senderBalance, recipientBalance, transferAmount);
         }
 
 
