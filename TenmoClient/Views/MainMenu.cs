@@ -75,7 +75,7 @@ namespace TenmoClient.Views
                 int accountToAccountId = t.AccountTo;
                 User userTo = methods.GetUser(accountToAccountId);
 
-                Console.WriteLine($"{t.TransferId}              From: {userFrom.Username}  to:  {userTo.Username}      {t.Amount}");
+                Console.WriteLine($"{t.TransferId}              From: {userFrom.Username}  to:  {userTo.Username}      {t.Amount:c}");
             }
 
             Console.WriteLine("");
@@ -198,6 +198,7 @@ namespace TenmoClient.Views
             int recipientUserId = 0;
             int counter = 0;
             int gotrecipientUserId = 0;
+            int userIdCheck = UserService.GetUserId();
             while (gotrecipientUserId != 1)
             {
                 try
@@ -210,7 +211,7 @@ namespace TenmoClient.Views
                     recipientUserId = int.Parse(Console.ReadLine());
                     for (int i = 0; i < listOfUsers.Count; i++)
                     {
-                        if (listOfUsers[i].UserId == recipientUserId)
+                        if (listOfUsers[i].UserId == recipientUserId && listOfUsers[i].UserId != userIdCheck)
                         {
                             gotrecipientUserId = 1;
                         }
@@ -218,7 +219,7 @@ namespace TenmoClient.Views
 
                     if ((counter < maxAttempts) && (gotrecipientUserId == 0))
                     {
-                        Console.WriteLine("That transfer ID does not exist. Please enter a valid ID.");
+                        Console.WriteLine("That transfer ID does not exist or is not valid. Please enter a valid ID.");
                         counter++;
                         Console.WriteLine($"You have {3 - counter} attempts left.");
                     }
@@ -293,7 +294,7 @@ namespace TenmoClient.Views
                     listOfAccts.Add(acct);
                 }
             }
-            if (senderBalance >= transferAmount)
+            if (senderBalance >= transferAmount) 
             {
                 //2. For the sender account, we have to set account.Balance = senderBalance - transferAmount
                 methods.TransferBucks(senderAccountId, recipientAccountId, senderBalance, recipientBalance, transferAmount, listOfAccts);

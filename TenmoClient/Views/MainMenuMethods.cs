@@ -133,6 +133,7 @@ namespace TenmoClient.Views
             RestRequest request = new RestRequest(API_ACCOUNT_URL + senderAccountId + "/transfer/" + recipientAccountId + "/" + senderBalance + "/" +
                 recipientBalance + "/" + transferAmount);
             request.AddJsonBody(listOfAccts);
+            client.Put<List<Account>>(request);
   
         }
 
